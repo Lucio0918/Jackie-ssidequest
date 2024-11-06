@@ -8,10 +8,12 @@ from scipy.ndimage import map_coordinates
 from Interactive_PointBasedRegistration import *
 from ImageProjection import *
 
+# loading in data
 f = open('Project4.json', encoding='utf-8-sig')
 dt = json.load(f)
 f.close()
 
+# loading in data
 f = open('T1T2.json', encoding='utf-8-sig')
 dt1t2 = json.load(f)
 f.close()
@@ -21,16 +23,24 @@ f.close()
 
 
 landmarks = np.array(dt['Proj4landmarks'])
+
+# deformation field data
 D=np.array(dt['D'])
+
+# transformation matrix (from CT to T1 space)
 CT2T1= np.array(dt['CT2T1'])
+
+# imaging data for CT, CTwarp, and T1
 ct=np.array(dt['ct']['data'])
 ctwarp= np.array(dt['ctwarp']['data'])
 t1= np.array(dt['t1']['data'])
+
+# voxel sizes for CT and T1 images
 ctvoxsz=np.array(dt['ct']['voxsz'])
 t1voxsz=np.array(dt['t1']['voxsz'])
 
 
-
+# fuck ton of print statements for metadata + shapes
 print(dt['t1']['dim'])
 print(dt['t1']['voxsz'])
 print(dt['t1']['orient'])
@@ -155,19 +165,24 @@ print("Shape of CT", np.shape(ct))
 # print(final)
 
 
-
+# interactive point based registration (to align warped CT image with original CT image based on voxel size)
+# meaning that ipr2 contains transformation matrices + deformation fields 
 ipr2 = interactive_pointBasedRegistration(ctwarp, ctvoxsz, ct, ctvoxsz)
 
 # Calculate Mean Absolute Difference between Db and D
+# measure of registration accuracy
 mad_deformation_field = np.mean(np.abs(D - ipr.Db))
 
 # Calculate the inverse of your transformation matrix
+# for validating/comparing transformations (by basically reversing the transformation that was applied)
 computed_transformation_inv = np.linalg.inv(ipr.T1to2)
 
 # Compute the product of CT2T1 and the inverse of your computed transformation
+# enables evaluation of alignment between initial transformation aka CT2T1 and the transformation that was applied aka T1to2
 transformation_comparison = np.dot(computed_transformation_inv, CT2T1)
 
 # Extract the translation component (last column) and calculate its error in mm
+# error in translation between the two transformations
 translation_error = np.linalg.norm(transformation_comparison[:3, 3])
 
 # Check if the translation component error is within 10 mm

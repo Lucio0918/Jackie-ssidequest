@@ -160,11 +160,15 @@ print("Shape of CT", np.shape(ct))
 # final=np.dot(fud1, CT2T1)
 # print(final)
 
+# Add a print statement before initializing interactive_pointBasedRegistration
+print("Initializing interactive point-based registration. Please interact with the GUI to proceed.")
 
 # interactive point based registration (to align warped CT image with original CT image based on voxel size, done by picking landmarks on each image and adjusting one image til landmarks align...great stuff)
 # meaning that ipr2 contains transformation matrices + deformation fields
 ipr2 = interactive_pointBasedRegistration(ctwarp, ctvoxsz, ct, ctvoxsz)
 
+# Add a print statement after initializing interactive_pointBasedRegistration
+print("Interactive point-based registration initialized. If a GUI has opened, please use it to perform the registration.")
  # Calculate Mean Absolute Difference between Db and D to measure registration accuracy
 mad_deformation_field = np.mean(np.abs(D - ipr.Db))
 

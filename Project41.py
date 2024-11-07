@@ -7,16 +7,35 @@ from skimage.io import imread
 from scipy.ndimage import map_coordinates
 from Interactive_PointBasedRegistration import *
 from ImageProjection import *
+import gdown
 
-# loading in data
-f = open('Project4.json', encoding='utf-8-sig')
-dt = json.load(f)
-f.close()
+# LUCIO: INSTALL GDOWN
 
-# loading in data
-f = open('T1T2.json', encoding='utf-8-sig')
-dt1t2 = json.load(f)
-f.close()
+# file interactions:
+    # volumeViewer.py: imports this file and uses it to display images
+    # Interactive_PointBasedRegistration.py: imports this file, uses it for point-based registration
+    # ImageProjection.py: imports and uses it to project image from one space to another
+
+# links to google drive file containing Project4.json
+project4_file_id = '1V75MLZ9OW6Q3orZnFwDxyOmoaLF6Ngw0'
+project4_path = 'Project4.json'
+
+# download from google drive
+gdown.download(f'https://drive.google.com/uc?id={project4_file_id}', project4_path, quiet=False)
+
+with open(project4_path, encoding='utf-8-sig') as f:
+    dt = json.load(f)
+
+
+# # loading in data
+# f = open('Project4.json', encoding='utf-8-sig')
+# dt = json.load(f)
+# f.close()
+
+# # loading in data
+# f = open('T1T2.json', encoding='utf-8-sig')
+# dt1t2 = json.load(f)
+# f.close()
 
 # for key, _ in dt['D'].items():
 #      print(key)
@@ -165,12 +184,12 @@ print("Shape of CT", np.shape(ct))
 # print(final)
 
 
-# interactive point based registration (to align warped CT image with original CT image based on voxel size)
-# meaning that ipr2 contains transformation matrices + deformation fields 
+# interactive point based registration (to align warped CT image with original CT image based on voxel size, done by picking landmarks on each image and adjusting one image til landmarks align...great stuff)
+# meaning that ipr2 contains transformation matrices + deformation fields
 ipr2 = interactive_pointBasedRegistration(ctwarp, ctvoxsz, ct, ctvoxsz)
 
 # Calculate Mean Absolute Difference between Db and D
-# measure of registration accuracy
+# measure of registration accuracy (how well do these images match up)
 mad_deformation_field = np.mean(np.abs(D - ipr.Db))
 
 # Calculate the inverse of your transformation matrix
@@ -182,7 +201,7 @@ computed_transformation_inv = np.linalg.inv(ipr.T1to2)
 transformation_comparison = np.dot(computed_transformation_inv, CT2T1)
 
 # Extract the translation component (last column) and calculate its error in mm
-# error in translation between the two transformations
+# error in translation between the two transformations (is the shift in position between both images within a reasonable range)
 translation_error = np.linalg.norm(transformation_comparison[:3, 3])
 
 # Check if the translation component error is within 10 mm

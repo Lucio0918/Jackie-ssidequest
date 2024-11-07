@@ -7,38 +7,15 @@ from skimage.io import imread
 from scipy.ndimage import map_coordinates
 from Interactive_PointBasedRegistration import *
 from ImageProjection import *
-import gdown
-
-# LUCIO: INSTALL GDOWN
-
 # file interactions:
     # volumeViewer.py: imports this file and uses it to display images
     # Interactive_PointBasedRegistration.py: imports this file, uses it for point-based registration
     # ImageProjection.py: imports and uses it to project image from one space to another
-
 # links to google drive file containing Project4.json
 project4_file_id = '1V75MLZ9OW6Q3orZnFwDxyOmoaLF6Ngw0'
 project4_path = 'Project4.json'
-
-# download from google drive
-gdown.download(f'https://drive.google.com/uc?id={project4_file_id}', project4_path, quiet=False)
-
 with open(project4_path, encoding='utf-8-sig') as f:
     dt = json.load(f)
-
-
-# # loading in data
-# f = open('Project4.json', encoding='utf-8-sig')
-# dt = json.load(f)
-# f.close()
-
-# # loading in data
-# f = open('T1T2.json', encoding='utf-8-sig')
-# dt1t2 = json.load(f)
-# f.close()
-
-# for key, _ in dt['D'].items():
-#      print(key)
 
 
 landmarks = np.array(dt['Proj4landmarks'])
@@ -59,7 +36,7 @@ ctvoxsz=np.array(dt['ct']['voxsz'])
 t1voxsz=np.array(dt['t1']['voxsz'])
 
 
-# fuck ton of print statements for metadata + shapes
+ # Print statements for metadata + shapes
 print(dt['t1']['dim'])
 print(dt['t1']['voxsz'])
 print(dt['t1']['orient'])
@@ -188,20 +165,16 @@ print("Shape of CT", np.shape(ct))
 # meaning that ipr2 contains transformation matrices + deformation fields
 ipr2 = interactive_pointBasedRegistration(ctwarp, ctvoxsz, ct, ctvoxsz)
 
-# Calculate Mean Absolute Difference between Db and D
-# measure of registration accuracy (how well do these images match up)
+ # Calculate Mean Absolute Difference between Db and D to measure registration accuracy
 mad_deformation_field = np.mean(np.abs(D - ipr.Db))
 
-# Calculate the inverse of your transformation matrix
-# for validating/comparing transformations (by basically reversing the transformation that was applied)
+ # Calculate the inverse of the transformation matrix to validate/compare transformations
 computed_transformation_inv = np.linalg.inv(ipr.T1to2)
 
-# Compute the product of CT2T1 and the inverse of your computed transformation
-# enables evaluation of alignment between initial transformation aka CT2T1 and the transformation that was applied aka T1to2
+ # Compute the product of CT2T1 and the inverse of the computed transformation to evaluate alignment
 transformation_comparison = np.dot(computed_transformation_inv, CT2T1)
 
-# Extract the translation component (last column) and calculate its error in mm
-# error in translation between the two transformations (is the shift in position between both images within a reasonable range)
+ # Extract the translation component and calculate its error in mm to assess translation error between transformations
 translation_error = np.linalg.norm(transformation_comparison[:3, 3])
 
 # Check if the translation component error is within 10 mm

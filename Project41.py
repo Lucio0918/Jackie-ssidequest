@@ -166,6 +166,7 @@ print("Initializing interactive point-based registration. Please interact with t
 # interactive point based registration (to align warped CT image with original CT image based on voxel size, done by picking landmarks on each image and adjusting one image til landmarks align...great stuff)
 # meaning that ipr2 contains transformation matrices + deformation fields
 ipr2 = interactive_pointBasedRegistration(ctwarp, ctvoxsz, ct, ctvoxsz)
+plt.show()  # Ensure that the GUI is displayed
 
 # Add a print statement after initializing interactive_pointBasedRegistration
 print("Interactive point-based registration initialized. If a GUI has opened, please use it to perform the registration.")

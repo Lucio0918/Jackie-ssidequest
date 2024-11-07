@@ -228,8 +228,7 @@ class interactive_pointBasedRegistration:
         self.D = []
         self.Db = []
         while self.win1.finished==0 and self.win2.finished==0:
-            self.win1.d.fig.canvas.draw_idle()
-            self.win1.d.fig.canvas.start_event_loop(0.3)
+            plt.pause(0.1)  # Use plt.pause to allow for GUI events to be processed
 
         # mlab.close(self.win1.d.f3d)
         # plt.close(self.win1.d.fig)

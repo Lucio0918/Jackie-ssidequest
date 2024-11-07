@@ -7,15 +7,33 @@ from skimage.io import imread
 from scipy.ndimage import map_coordinates
 from Interactive_PointBasedRegistration import *
 from ImageProjection import *
+
+import json
+import gdown
+import os
+
+
 # file interactions:
     # volumeViewer.py: imports this file and uses it to display images
     # Interactive_PointBasedRegistration.py: imports this file, uses it for point-based registration
     # ImageProjection.py: imports and uses it to project image from one space to another
+
 # links to google drive file containing Project4.json
 project4_file_id = '1V75MLZ9OW6Q3orZnFwDxyOmoaLF6Ngw0'
+project4_url = f'https://drive.google.com/uc?id={project4_file_id}'
 project4_path = 'Project4.json'
+
+# download the file if it doesn't already exist locally
+if not os.path.exists(project4_path):
+    print("Downloading Project4.json from Google Drive...")
+    gdown.download(project4_url, project4_path, quiet=False)
+else:
+    print("File already exists locally.")
+
+# load JSON data
 with open(project4_path, encoding='utf-8-sig') as f:
     dt = json.load(f)
+
 
 
 landmarks = np.array(dt['Proj4landmarks'])
@@ -160,29 +178,25 @@ print("Shape of CT", np.shape(ct))
 # final=np.dot(fud1, CT2T1)
 # print(final)
 
-# Add a print statement before initializing interactive_pointBasedRegistration
-print("Initializing interactive point-based registration. Please interact with the GUI to proceed.")
-
 # interactive point based registration (to align warped CT image with original CT image based on voxel size, done by picking landmarks on each image and adjusting one image til landmarks align...great stuff)
 # meaning that ipr2 contains transformation matrices + deformation fields
 ipr2 = interactive_pointBasedRegistration(ctwarp, ctvoxsz, ct, ctvoxsz)
-plt.show()  # Ensure that the GUI is displayed
+plt.show()
 
-# Add a print statement after initializing interactive_pointBasedRegistration
-print("Interactive point-based registration initialized. If a GUI has opened, please use it to perform the registration.")
- # Calculate Mean Absolute Difference between Db and D to measure registration accuracy
+
+ # calculate Mean Absolute Difference between Db and D to measure registration accuracy
 mad_deformation_field = np.mean(np.abs(D - ipr.Db))
 
- # Calculate the inverse of the transformation matrix to validate/compare transformations
+ # calculate the inverse of the transformation matrix to validate/compare transformations
 computed_transformation_inv = np.linalg.inv(ipr.T1to2)
 
- # Compute the product of CT2T1 and the inverse of the computed transformation to evaluate alignment
+ # compute the product of CT2T1 and the inverse of the computed transformation to evaluate alignment
 transformation_comparison = np.dot(computed_transformation_inv, CT2T1)
 
- # Extract the translation component and calculate its error in mm to assess translation error between transformations
+ # extract the translation component and calculate its error in mm to assess translation error between transformations
 translation_error = np.linalg.norm(transformation_comparison[:3, 3])
 
-# Check if the translation component error is within 10 mm
+# check if the translation component error is within 10 mm
 print("Transformation Comparison Matrix:\n", transformation_comparison)
 print("Translation Component Error (mm):", translation_error)
 if translation_error < 10:
